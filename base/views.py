@@ -2,8 +2,12 @@ from django.shortcuts import render
 from .models import ProductType, Department
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
-from .serializers import ProductTypeSerializer, DepartmentSerializer
+from .serializers import ProductTypeSerializer, DepartmentSerializer, UserSerializer, LoginSerializer
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 # Create your views here.
 class ProductTypeApiView(ModelViewSet):
@@ -13,7 +17,6 @@ class ProductTypeApiView(ModelViewSet):
 class DepartmentApiView(GenericViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-    
     
     def list(self,request):
         queryset = self.get_queryset()
@@ -66,3 +69,31 @@ class DepartmentApiView(GenericViewSet):
         queryset.delete()
         return Response()
         
+class UserApiView(GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = []
+
+    def register(self,request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+    def login(self,request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid(): # Validate whether user information is being sent or not
+            username = request.data.get('username')
+            password = request.data.get('password')
+
+            user = authenticate(username=username,password=password) # Passing username and password in authenticate to check whether it matches with any user or not, if matched it returns user object data if not it returns None
+
+            if user == None: # If authenticate returned None, responding with invalid credentials response
+                return Response({'error':'Invalid credentials!'},status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                token,_ = Token.objects.get_or_create(user=user) # Creating token object with user value , using get or create query because token object has user as one to one relation so we cannot create multiple token objects for a user 
+                return Response({'token':token.key})
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

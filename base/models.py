@@ -14,6 +14,7 @@ class Product(models.Model):
     type = models.ForeignKey(ProductType,on_delete=models.SET_NULL, null=True)
     department = models.ManyToManyField(Department)
 
+
 class Vendor(models.Model):
     name = models.CharField(max_length=300)
     phone = models.CharField(max_length=20)
