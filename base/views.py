@@ -1,15 +1,34 @@
 from django.shortcuts import render
-from .models import ProductType, Department
+from .models import ProductType, Department, Product, Sell
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
-from .serializers import ProductTypeSerializer, DepartmentSerializer, UserSerializer, LoginSerializer
+from .serializers import ProductTypeSerializer, DepartmentSerializer, UserSerializer, LoginSerializer, ProductSerializer,SellSerializer
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from django.db.models import Sum,Avg
 
 # Create your views here.
+class ProductTypeApiView(ModelViewSet):
+    queryset = ProductType.objects.all()
+    serializer_class = ProductTypeSerializer
+
+class ProductApiView(ModelViewSet):
+    # queryset = Product.objects.all().order_by('-stock') ordering product datas in query according to stock in descending format using(-) removing (-) will give us product ordering according to stock in ascending format
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def best_selling(self,request):
+        queryset = Product.objects.all().annotate(total_sell_quantity=Sum('sells__quantity')).order_by('-total_sell_quantity')
+        serializer = self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
+
+class SellApiView(ModelViewSet):
+    queryset = Sell.objects.all()
+    serializer_class = SellSerializer
+
 class ProductTypeApiView(ModelViewSet):
     queryset = ProductType.objects.all()
     serializer_class = ProductTypeSerializer
@@ -68,7 +87,9 @@ class DepartmentApiView(GenericViewSet):
         queryset = self.get_object()
         queryset.delete()
         return Response()
-        
+
+
+       
 class UserApiView(GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer

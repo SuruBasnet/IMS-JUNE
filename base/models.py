@@ -31,7 +31,8 @@ class Customer(models.Model):
     phone = models.CharField(max_length=20)
 
 class Sell(models.Model):
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE, related_name='sells')
+    # type = models.ForeignKey(ProductType) # To define which type of product is being selled (Not ideal becasue product is related as per requirement and type is related on product so we can directly use product relation to get type value aswell)
     price = models.FloatField()
-    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
     quantity = models.IntegerField()
