@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from base.views import ProductTypeApiView, DepartmentApiView, UserApiView, ProductApiView,SellApiView
+from base.views import ProductTypeApiView, DepartmentApiView, UserApiView, ProductApiView,SellApiView, PurchaseApiView, RatingApiView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -33,6 +33,16 @@ urlpatterns = [
 
     path("sells/",SellApiView.as_view({'get':'list','post':'create'})),
     path("sells/<int:pk>/", SellApiView.as_view({'get':'retrieve','put':'update','delete':'destroy'})),
+    
+    path("purchases/",PurchaseApiView.as_view({'get':'list','post':'create'})),
+    path("purchases/<int:pk>/", PurchaseApiView.as_view({'get':'retrieve','put':'update','delete':'destroy'})),
+    
+    path("product/ratings/",RatingApiView.as_view({'get':'list','post':'create'})),
+    path("product/ratings/<int:pk>/", RatingApiView.as_view({'get':'retrieve','put':'update','delete':'destroy'})),
+
+    path("most/purchased/products/",ProductApiView.as_view({'get':'most_purchased'})),
+    
+    path("top/rated/products/",ProductApiView.as_view({'get':'top_rated'})),
 
     path("departments/",DepartmentApiView.as_view({'get':'list','post':'create'})),
     path("departments/<int:pk>/",DepartmentApiView.as_view({'get':'retrieve','patch':'partial_update','put':'update','delete':'destroy'})),

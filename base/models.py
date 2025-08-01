@@ -21,9 +21,9 @@ class Vendor(models.Model):
     email = models.EmailField()
 
 class Purchase(models.Model):
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='purchases')
     price = models.FloatField()
-    vendor = models.ForeignKey(Vendor,on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor,on_delete=models.CASCADE,null=True)
     quantity = models.IntegerField()
 
 class Customer(models.Model):
@@ -36,3 +36,8 @@ class Sell(models.Model):
     price = models.FloatField()
     customer = models.ForeignKey(Customer,on_delete=models.CASCADE,null=True)
     quantity = models.IntegerField()
+
+class Rating(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE, related_name='ratings')
+    rating = models.IntegerField()
+    comment = models.TextField(null=True)

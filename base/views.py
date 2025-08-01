@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import ProductType, Department, Product, Sell
+from .models import ProductType, Department, Product, Sell, Purchase, Rating
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
-from .serializers import ProductTypeSerializer, DepartmentSerializer, UserSerializer, LoginSerializer, ProductSerializer,SellSerializer
+from .serializers import ProductTypeSerializer, DepartmentSerializer, UserSerializer, LoginSerializer, ProductSerializer,SellSerializer, PurchaseSerializer, RatingSerializer
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
@@ -24,10 +24,29 @@ class ProductApiView(ModelViewSet):
         queryset = Product.objects.all().annotate(total_sell_quantity=Sum('sells__quantity')).order_by('-total_sell_quantity')
         serializer = self.get_serializer(queryset,many=True)
         return Response(serializer.data)
+    
+    def most_purchased(self,request):
+        queryset = Product.objects.all().annotate(total_purchased_quantity=Sum('purchases__quantity')).order_by('-total_purchased_quantity')
+        serializer = self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
+
+    def top_rated(self,request):
+        queryset = Product.objects.all().annotate(avg_rating=Avg('ratings__rating')).order_by('-avg_rating')
+        serializer = self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
+
 
 class SellApiView(ModelViewSet):
     queryset = Sell.objects.all()
     serializer_class = SellSerializer
+
+class PurchaseApiView(ModelViewSet):
+    queryset = Purchase.objects.all()
+    serializer_class = PurchaseSerializer
+
+class RatingApiView(ModelViewSet):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
 
 class ProductTypeApiView(ModelViewSet):
     queryset = ProductType.objects.all()
@@ -88,8 +107,6 @@ class DepartmentApiView(GenericViewSet):
         queryset.delete()
         return Response()
 
-
-       
 class UserApiView(GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
